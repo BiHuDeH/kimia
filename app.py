@@ -31,7 +31,7 @@ def process_data(file):
     report['New_Column'] = (report['Card_to_Card'] / 110) * 100
     
     # Rename columns in Persian for the output report
-    report.columns = ['تاریخ', 'کارت به کارت', 'فروش', 'کارمزد']
+    report.columns = ['تاریخ', 'کارت به کارت', 'محاسبه جدید', 'کارمزد']
     
     return report
 
