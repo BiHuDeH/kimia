@@ -33,7 +33,8 @@ def process_data(file):
     # Calculate the "مالیات" column as the difference between "کارت به کارت" and "فروش"
     report['مالیات'] = report['Card_to_Card'] - report['فروش']
     
-    # Rename columns in Persian for the output report
+    # Rename columns in Persian for the output report and arrange in the specified order
+    report = report[['Date', 'Card_to_Card', 'فروش', 'مالیات', 'Fee']]
     report.columns = ['تاریخ', 'کارت به کارت', 'فروش', 'مالیات', 'کارمزد']
     
     return report
