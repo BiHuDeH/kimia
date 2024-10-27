@@ -27,11 +27,14 @@ def process_data(file):
         Fee=('Withdrawal', lambda x: x[withdrawal_filter].sum())
     ).reset_index()
     
-    # Calculate the new column
-    report['New_Column'] = (report['Card_to_Card'] / 110) * 100
+    # Calculate the "فروش" column (Toy Price) by dividing "کارت به کارت" by 1.1
+    report['فروش'] = report['Card_to_Card'] / 1.1
+    
+    # Calculate the "مالیات" column as the difference between "کارت به کارت" and "فروش"
+    report['مالیات'] = report['Card_to_Card'] - report['فروش']
     
     # Rename columns in Persian for the output report
-    report.columns = ['تاریخ', 'کارت به کارت', 'محاسبه جدید', 'کارمزد']
+    report.columns = ['تاریخ', 'کارت به کارت', 'فروش', 'مالیات', 'کارمزد']
     
     return report
 
