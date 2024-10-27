@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import io
 
-# Title for Streamlit app
 st.title("گزارش تراکنش")
 
 # Upload file
@@ -24,12 +23,15 @@ def process_data(file):
     
     # Group by date and sum deposits and withdrawals based on filters
     report = df.groupby('Date').agg(
-        Total_Deposits=('Deposit', lambda x: x[deposit_filter].sum()),
-        Total_Withdrawals=('Withdrawal', lambda x: x[withdrawal_filter].sum())
+        Card_to_Card=('Deposit', lambda x: x[deposit_filter].sum()),
+        Fee=('Withdrawal', lambda x: x[withdrawal_filter].sum())
     ).reset_index()
     
+    # Calculate the new column
+    report['New_Column'] = (report['Card_to_Card'] / 110) * 100
+    
     # Rename columns in Persian for the output report
-    report.columns = ['تاریخ', 'جمع واریزی‌ها', 'جمع برداشت‌ها']
+    report.columns = ['تاریخ', 'کارت به کارت', 'فروش', 'کارمزد']
     
     return report
 
@@ -44,7 +46,6 @@ if uploaded_file:
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         report.to_excel(writer, index=False, sheet_name='گزارش')
-        writer.save()
     
     # Set up download button
     st.download_button(
