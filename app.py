@@ -1,13 +1,8 @@
 import pandas as pd
 import streamlit as st
+from io import BytesIO
 
-def process_data(file):
-    # Load the data
-    df = pd.read_excel(file, skiprows=2)
-    df.columns = ['Index', 'Branch Code', 'Branch', 'Date', 'Time', 'Document Number', 
-                  'Receipt Number', 'Check Number', 'Description', 'Withdrawal', 
-                  'Deposit', 'Balance', 'Notes']
-    
+def process_data(df):
     # Drop any rows without a date (non-data rows)
     df = df.dropna(subset=['Date'])
 
@@ -38,16 +33,39 @@ def process_data(file):
     
     return report
 
+def convert_df_to_excel(df):
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name='Report')
+        writer.save()
+    return output.getvalue()
+
 # Streamlit main app setup
 def main():
     st.title("Financial Data Report")
     
     uploaded_file = st.file_uploader("Choose an Excel file", type="xlsx")
     if uploaded_file:
-        # Process and display the data
-        report = process_data(uploaded_file)
+        # Load and process the data
+        df = pd.read_excel(uploaded_file, skiprows=2)
+        df.columns = ['Index', 'Branch Code', 'Branch', 'Date', 'Time', 'Document Number', 
+                      'Receipt Number', 'Check Number', 'Description', 'Withdrawal', 
+                      'Deposit', 'Balance', 'Notes']
+        
+        report = process_data(df)
+
+        # Display the processed report
         st.write("### Processed Report")
         st.dataframe(report)
+
+        # Convert the report DataFrame to Excel for download
+        excel_data = convert_df_to_excel(report)
+        st.download_button(
+            label="Download Report as Excel",
+            data=excel_data,
+            file_name="Financial_Report.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
 
 if __name__ == "__main__":
     main()
