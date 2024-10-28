@@ -32,13 +32,15 @@ def process_data(file):
     total_row = pd.DataFrame({
         'Date': [f"{report['Date'].nunique()} روز"],
         'Card_to_Card': [f"{int(df['Deposit'][deposit_filter].sum()):,}"],
-        'فروش': [f"{int(report['فروش'].str.replace(',', '').astype(int).sum()):,}"],
-        'مالیات': [f"{int(report['مالیات'].str.replace(',', '').astype(int).sum()):,}"],
+        'فروش': [f"{int(df['Deposit'][deposit_filter].sum() / 1.1):,}"],  # Ensure correct calculation for sales
+        'مالیات': [f"{int(df['Deposit'][deposit_filter].sum() - (df['Deposit'][deposit_filter].sum() / 1.1)):,}"],  # Ensure correct calculation for tax
         'Fee': [f"{int(df['Withdrawal'][withdrawal_filter].sum()):,}"]
     })
 
     # Concatenate the total row to the report DataFrame
     report = pd.concat([report, total_row], ignore_index=True)
+
+    # Ensure correct column names and order
     report.columns = ['تاریخ', 'کارت به کارت', 'فروش', 'مالیات', 'کارمزد']
     
     return report
