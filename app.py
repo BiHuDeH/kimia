@@ -40,8 +40,8 @@ def process_data(file):
     # Concatenate the total row to the report DataFrame
     report = pd.concat([report, total_row], ignore_index=True)
 
-    # Rename columns without changing their contents
-    report.columns = ['تاریخ', 'کارت به کارت', 'مالیات', 'فروش', 'کارمزد']
+    # Update column names in the specified order, keeping column data unchanged
+    report.columns = ['تاریخ', 'کارت به کارت', 'فروش', 'مالیات', 'کارمزد']
     
     return report
 
