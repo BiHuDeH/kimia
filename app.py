@@ -41,7 +41,7 @@ def process_data(file):
     report = pd.concat([report, total_row], ignore_index=True)
 
     # Ensure correct column names and order based on the screenshot provided
-    report.columns = ['تاریخ', 'کارت به کارت', 'فروش', 'مالیات', 'کارمزد']
+    report.columns = ['تاریخ', 'کارت به کارت', 'کارمزد', 'فروش', 'مالیات']
     
     return report
 
