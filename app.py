@@ -9,7 +9,7 @@ def process_data(file):
                   'Deposit', 'Balance', 'Notes']
     
     # Filters for deposits and withdrawals based on descriptions
-    card_to_card_filter = df['Description'].str.contains('کارت', na=False)
+    card_to_card_filter = df['Description'].str.contains('انتقال از', na=False)
     fee_filter = df['Description'].str.contains('کارمزد', na=False)
     
     # Group and calculate Card-to-Card and Fee based on the filters
