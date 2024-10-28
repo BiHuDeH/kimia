@@ -28,7 +28,23 @@ def process_data(file):
     report['فروش'] = report['Card_to_Card'] / 1.1
     report['مالیات'] = report['Card_to_Card'] - report['فروش']
     
-    report = report[['Date', 'Card_to_Card', 'فروش', 'مالیات', 'Fee']]
+    # Format values with thousands separator, no decimal points
+    report['Card_to_Card'] = report['Card_to_Card'].apply(lambda x: f"{int(x):,}")
+    report['فروش'] = report['فروش'].apply(lambda x: f"{int(x):,}")
+    report['مالیات'] = report['مالیات'].apply(lambda x: f"{int(x):,}")
+    report['Fee'] = report['Fee'].apply(lambda x: f"{int(x):,}")
+    
+    # Add total row with sum of columns
+    total_row = {
+        'Date': f"{report['Date'].nunique()} روز",
+        'Card_to_Card': f"{int(report['Card_to_Card'].replace(',', '').astype(int).sum()):,}",
+        'فروش': f"{int(report['فروش'].replace(',', '').astype(int).sum()):,}",
+        'مالیات': f"{int(report['مالیات'].replace(',', '').astype(int).sum()):,}",
+        'Fee': f"{int(report['Fee'].replace(',', '').astype(int).sum()):,}"
+    }
+    report = report.append(total_row, ignore_index=True)
+
+    # Rename columns in Persian for the output report and arrange in the specified order
     report.columns = ['تاریخ', 'کارت به کارت', 'فروش', 'مالیات', 'کارمزد']
     
     return report
@@ -38,7 +54,7 @@ if uploaded_file:
     with st.spinner("در حال پردازش گزارش..."):
         report = process_data(uploaded_file)
     
-    # Display the report
+    # Display the report in the app
     st.markdown("### گزارش روزانه تراکنش‌ها")
     st.dataframe(report.style.set_properties(**{'text-align': 'center'}).set_table_styles(
         [{'selector': 'th', 'props': [('font-weight', 'bold'), ('background-color', '#f0f0f0')]}]
