@@ -1,4 +1,6 @@
 pandas
 openpyxl
 cryptography
-xlsxwriter                                                     
+xlsxwriter
+streamlit
+pdfplumber
