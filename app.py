@@ -8,40 +8,40 @@ def process_data(file):
                   'Receipt Number', 'Check Number', 'Description', 'Withdrawal', 
                   'Deposit', 'Balance', 'Notes']
     
-    # Filters for deposits and withdrawals based on Persian descriptions
-    deposit_filter = df['Description'].str.contains('کارت', na=False)
-    withdrawal_filter = df['Description'].str.contains('کارمزد', na=False)
+    # Filters for deposits and withdrawals based on descriptions
+    card_to_card_filter = df['Description'].str.contains('کارت', na=False)
+    fee_filter = df['Description'].str.contains('کارمزد', na=False)
     
-    # Group and calculate sums for relevant fields
+    # Group and calculate Card-to-Card and Fee based on the filters
     report = df.groupby('Date').agg(
-        Card_to_Card=('Deposit', lambda x: x[deposit_filter].sum()),
-        Fee=('Withdrawal', lambda x: x[withdrawal_filter].sum())
+        Card_to_Card=('Deposit', lambda x: x[card_to_card_filter].sum()),
+        Fee=('Withdrawal', lambda x: x[fee_filter].sum())
     ).reset_index()
     
-    # Calculate sales and tax
-    report['Sales'] = report['Card_to_Card'] / 1.1  # Deducting 10% tax
-    report['Tax'] = report['Card_to_Card'] - report['Sales']
+    # Calculate Sales and Tax
+    report['Sales'] = report['Card_to_Card'] / 1.1  # Calculating Sales by removing 10% Tax
+    report['Tax'] = report['Card_to_Card'] - report['Sales']  # Calculating Tax as 10% of Sales
     
-    # Format values with thousands separator and no decimal points
+    # Format values with thousands separator
     report['Card_to_Card'] = report['Card_to_Card'].apply(lambda x: f"{int(x):,}")
     report['Sales'] = report['Sales'].apply(lambda x: f"{int(x):,}")
     report['Tax'] = report['Tax'].apply(lambda x: f"{int(x):,}")
     report['Fee'] = report['Fee'].apply(lambda x: f"{int(x):,}")
 
-    # Calculate total row values without affecting the formatted report values
+    # Total row calculations (without affecting formatted report values)
     total_row = pd.DataFrame({
-        'Date': [f"{report['Date'].nunique()} روز"],
-        'Card_to_Card': [f"{int(df['Deposit'][deposit_filter].sum()):,}"],
-        'Sales': [f"{int(df['Deposit'][deposit_filter].sum() / 1.1):,}"],  # Corrected sales calculation
-        'Tax': [f"{int(df['Deposit'][deposit_filter].sum() - (df['Deposit'][deposit_filter].sum() / 1.1)):,}"],  # Corrected tax calculation
-        'Fee': [f"{int(df['Withdrawal'][withdrawal_filter].sum()):,}"]
+        'Date': [f"{report['Date'].nunique()} days"],
+        'Card_to_Card': [f"{int(df['Deposit'][card_to_card_filter].sum()):,}"],
+        'Sales': [f"{int(df['Deposit'][card_to_card_filter].sum() / 1.1):,}"],  # Total Sales
+        'Tax': [f"{int(df['Deposit'][card_to_card_filter].sum() - (df['Deposit'][card_to_card_filter].sum() / 1.1)):,}"],  # Total Tax
+        'Fee': [f"{int(df['Withdrawal'][fee_filter].sum()):,}"]
     })
 
-    # Concatenate the total row to the report DataFrame
+    # Append the total row to the report DataFrame
     report = pd.concat([report, total_row], ignore_index=True)
 
-    # Update column names in the specified order, keeping column data unchanged
-    report.columns = ['تاریخ', 'کارت به کارت', 'فروش', 'مالیات', 'کارمزد']
+    # Set final column names in English (to avoid RTL misalignment issues)
+    report.columns = ['Date', 'Card_to_Card', 'Sales', 'Tax', 'Fee']
     
     return report
 
