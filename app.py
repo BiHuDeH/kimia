@@ -37,7 +37,7 @@ def convert_df_to_excel(df):
     output = BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         df.to_excel(writer, index=False, sheet_name='Report')
-        writer.save()
+    output.seek(0)  # Set the pointer to the beginning of the stream
     return output.getvalue()
 
 # Streamlit main app setup
@@ -45,6 +45,7 @@ def main():
     st.title("Financial Data Report")
     
     uploaded_file = st.file_uploader("Choose an Excel file", type="xlsx")
+    
     if uploaded_file:
         # Load and process the data
         df = pd.read_excel(uploaded_file, skiprows=2)
@@ -54,18 +55,26 @@ def main():
         
         report = process_data(df)
 
-        # Display the processed report
-        st.write("### Processed Report")
-        st.dataframe(report)
-
         # Convert the report DataFrame to Excel for download
         excel_data = convert_df_to_excel(report)
-        st.download_button(
-            label="Download Report as Excel",
-            data=excel_data,
-            file_name="Financial_Report.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+
+        # Create columns to arrange Preview and Download buttons side by side
+        col1, col2 = st.columns(2)
+
+        with col1:
+            # Preview button: Show the report in a table format only when clicked
+            if st.button("Preview Report"):
+                st.write("### Report Preview")
+                st.dataframe(report)
+
+        with col2:
+            # Download button
+            st.download_button(
+                label="Download Report as Excel",
+                data=excel_data,
+                file_name="Financial_Report.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
 
 if __name__ == "__main__":
     main()
