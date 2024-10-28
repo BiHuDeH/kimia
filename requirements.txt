@@ -2,5 +2,4 @@ pandas
 openpyxl
 cryptography
 xlsxwriter
-BytesIO                                                  
-pdfplumber   
+BytesIO                                                     
