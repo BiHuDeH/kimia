@@ -19,29 +19,29 @@ def process_data(file):
     ).reset_index()
     
     # Calculate sales and tax
-    report['فروش'] = report['Card_to_Card'] / 1.1  # Deducting 10% tax
-    report['مالیات'] = report['Card_to_Card'] - report['فروش']
+    report['Sales'] = report['Card_to_Card'] / 1.1  # Deducting 10% tax
+    report['Tax'] = report['Card_to_Card'] - report['Sales']
     
     # Format values with thousands separator and no decimal points
     report['Card_to_Card'] = report['Card_to_Card'].apply(lambda x: f"{int(x):,}")
-    report['فروش'] = report['فروش'].apply(lambda x: f"{int(x):,}")
-    report['مالیات'] = report['مالیات'].apply(lambda x: f"{int(x):,}")
+    report['Sales'] = report['Sales'].apply(lambda x: f"{int(x):,}")
+    report['Tax'] = report['Tax'].apply(lambda x: f"{int(x):,}")
     report['Fee'] = report['Fee'].apply(lambda x: f"{int(x):,}")
 
     # Calculate total row values without affecting the formatted report values
     total_row = pd.DataFrame({
         'Date': [f"{report['Date'].nunique()} روز"],
         'Card_to_Card': [f"{int(df['Deposit'][deposit_filter].sum()):,}"],
-        'فروش': [f"{int(df['Deposit'][deposit_filter].sum() / 1.1):,}"],  # Corrected sales calculation
-        'مالیات': [f"{int(df['Deposit'][deposit_filter].sum() - (df['Deposit'][deposit_filter].sum() / 1.1)):,}"],  # Corrected tax calculation
+        'Sales': [f"{int(df['Deposit'][deposit_filter].sum() / 1.1):,}"],  # Corrected sales calculation
+        'Tax': [f"{int(df['Deposit'][deposit_filter].sum() - (df['Deposit'][deposit_filter].sum() / 1.1)):,}"],  # Corrected tax calculation
         'Fee': [f"{int(df['Withdrawal'][withdrawal_filter].sum()):,}"]
     })
 
     # Concatenate the total row to the report DataFrame
     report = pd.concat([report, total_row], ignore_index=True)
 
-    # Ensure correct column names and order based on the screenshot provided
-    report.columns = ['تاریخ', 'کارت به کارت', 'کارمزد', 'فروش', 'مالیات']
+    # Rename columns without changing their contents
+    report.columns = ['تاریخ', 'کارت به کارت', 'مالیات', 'فروش', 'کارمزد']
     
     return report
 
