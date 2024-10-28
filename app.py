@@ -1,3 +1,6 @@
+import pandas as pd
+import streamlit as st
+
 def process_data(file):
     # Load the data
     df = pd.read_excel(file)
@@ -39,3 +42,17 @@ def process_data(file):
     report.columns = ['تاریخ', 'کارت به کارت', 'فروش', 'مالیات', 'کارمزد']
     
     return report
+
+# Streamlit main app setup
+def main():
+    st.title("Financial Data Report")
+    
+    uploaded_file = st.file_uploader("Choose an Excel file", type="xlsx")
+    if uploaded_file:
+        # Process and display the data
+        report = process_data(uploaded_file)
+        st.write("### Processed Report")
+        st.dataframe(report)
+
+if __name__ == "__main__":
+    main()
