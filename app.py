@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import streamlit as st
 from io import BytesIO
+from datetime import datetime
 import pdfplumber
 from openpyxl import Workbook
 from openpyxl.styles import Font, Border, Side, PatternFill, Alignment
@@ -20,32 +21,36 @@ cipher = Fernet(encryption_key)
 # Custom CSS for UI enhancements
 def set_custom_style():
     st.markdown(
-        """
+        f"""
         <style>
-            body {
+            body {{
                 background-color: #FAF3E0;
                 color: #333;
-            }
-            h1, h2, h3, h4, h5, h6 {
+            }}
+            h1, h2, h3, h4, h5, h6 {{
                 color: #003366;
-            }
-            .stButton > button {
+            }}
+            .stButton > button {{
                 background-color: #003366;
                 color: white;
                 border-radius: 12px;
                 padding: 10px 20px;
                 font-size: 16px;
-            }
-            .stButton > button:hover {
+            }}
+            .stButton > button:hover {{
                 background-color: #00509E;
-            }
-            .stFileUploader {
+            }}
+            .stFileUploader {{
                 border: 1px solid #ccc;
                 padding: 10px;
                 border-radius: 8px;
                 background-color: #FAF3E0;
-            }
+            }}
         </style>
+        <div style="font-size: small; text-align: right; color: #888;">
+            <p>Script Version: {SCRIPT_VERSION}</p>
+            <p>Last Update: {UPDATE_DATE}</p>
+        </div>
         """,
         unsafe_allow_html=True
     )
@@ -171,10 +176,13 @@ def process_data(df):
 
 # Main app setup
 def main():
-    st.sidebar.write(f"**Script Version:** {SCRIPT_VERSION}")
-st.sidebar.write(f"**Last Updated:** {UPDATE_DATE}")
     st.title("Financial Data Report")
     set_custom_style()
+
+    # Display version and update information in the sidebar
+    st.sidebar.write(f"**Script Version:** {SCRIPT_VERSION}")
+    st.sidebar.write(f"**Last Updated:** {UPDATE_DATE}")
+
     uploaded_file = st.file_uploader("Choose an Excel or PDF file", type=["xlsx", "pdf"])
     
     if uploaded_file:
