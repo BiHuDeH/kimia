@@ -9,6 +9,10 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from cryptography.fernet import Fernet
 
+# Version and Update Information
+SCRIPT_VERSION = "v1.2"
+UPDATE_DATE = "2024-11-01"
+
 # Generate a key for encryption
 encryption_key = Fernet.generate_key()
 cipher = Fernet(encryption_key)
@@ -167,9 +171,19 @@ def process_data(df):
 
 # Main app setup
 def main():
+    st.sidebar.write(f"**Script Version:** {SCRIPT_VERSION}")
+st.sidebar.write(f"**Last Updated:** {UPDATE_DATE}")
     st.title("Financial Data Report")
     set_custom_style()
-
+st.markdown(
+    f"""
+    <div style="font-size: small; text-align: right; color: #888;">
+        <p>Script Version: {SCRIPT_VERSION}</p>
+        <p>Last Update: {UPDATE_DATE}</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
     uploaded_file = st.file_uploader("Choose an Excel or PDF file", type=["xlsx", "pdf"])
     
     if uploaded_file:
