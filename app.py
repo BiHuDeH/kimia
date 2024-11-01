@@ -175,15 +175,6 @@ def main():
 st.sidebar.write(f"**Last Updated:** {UPDATE_DATE}")
     st.title("Financial Data Report")
     set_custom_style()
-st.markdown(
-    f"""
-    <div style="font-size: small; text-align: right; color: #888;">
-        <p>Script Version: {SCRIPT_VERSION}</p>
-        <p>Last Update: {UPDATE_DATE}</p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
     uploaded_file = st.file_uploader("Choose an Excel or PDF file", type=["xlsx", "pdf"])
     
     if uploaded_file:
