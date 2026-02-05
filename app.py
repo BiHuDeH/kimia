@@ -1,13 +1,14 @@
 import pandas as pd
 import streamlit as st
 from io import BytesIO
+from datetime import datetime  # <--- این خط جا افتاده بود
 from openpyxl import Workbook
 from openpyxl.styles import Font, Border, Side, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.table import Table, TableStyleInfo
 
 # Version and Update Information
-SCRIPT_VERSION = "v2.0 (Optimized)"
+SCRIPT_VERSION = "v2.1 (Fixed)"
 UPDATE_DATE = "2026-02-03"
 
 # --- Page Configuration ---
@@ -48,12 +49,6 @@ def set_custom_style():
     )
 
 # --- Logic Functions ---
-
-# تابع خالی برای PDF - چون کد اصلی شما این تابع را نداشت
-# اگر کد PDF دارید، باید اینجا اضافه کنید
-def extract_data_from_pdf(file_bytes):
-    st.warning("⚠️ تابع استخراج PDF در کد شما موجود نبود. فعلا غیرفعال است.")
-    return pd.DataFrame()
 
 def create_styled_report(df):
     output = BytesIO()
@@ -123,7 +118,7 @@ def create_styled_report(df):
 def process_data(df):
     # Ensure Date column exists and drop empty ones
     if 'Date' not in df.columns:
-        return pd.DataFrame() # Return empty if format is wrong
+        return pd.DataFrame() 
         
     df = df.dropna(subset=['Date'])
     
@@ -136,7 +131,6 @@ def process_data(df):
             df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
 
     # Filters
-    # Use simpler string checking
     df['Description'] = df['Description'].astype(str)
     
     card_to_card_mask = df['Description'].str.contains("انتقال از", na=False)
@@ -145,7 +139,6 @@ def process_data(df):
     snap_deposit_mask = df['Description'].str.contains("مدرن سامانه غذارسان اطلس", na=False)
 
     # Grouping
-    # We use reindex to ensure all dates exist even if sum is 0
     grouped = df.groupby('Date')
     
     card_to_card_sum = df[card_to_card_mask].groupby('Date')['Deposit'].sum().reindex(unique_dates, fill_value=0)
@@ -153,7 +146,7 @@ def process_data(df):
     daily_withdrawal_sum = df[daily_withdrawal_mask].groupby('Date')['Withdrawal'].sum().reindex(unique_dates, fill_value=0)
     snap_deposit_sum = df[snap_deposit_mask].groupby('Date')['Deposit'].sum().reindex(unique_dates, fill_value=0)
     
-    # Logic for End of Day Balance: Take the last balance of the day
+    # Logic for End of Day Balance
     end_of_day_balance = df.sort_values(['Date', 'Time']).groupby('Date')['Balance'].last().reindex(unique_dates, fill_value=0)
 
     # Create Report DataFrame
@@ -167,11 +160,10 @@ def process_data(df):
     report['End_of_Day_Balance'] = end_of_day_balance
 
     # Calculations
-    # Note: Sales = Card / 1.1 -> Tax = Card - Sales
     report['Sales'] = report['Card_to_Card'] / 1.1
     report['Tax'] = report['Card_to_Card'] - report['Sales']
 
-    # Reset index to make Date a column
+    # Reset index
     report = report.reset_index()
 
     # Rename to Persian
@@ -198,7 +190,6 @@ def main():
         try:
             # Read Data
             if uploaded_file.type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                # Assuming standard bank format usually starts data after a few rows
                 df = pd.read_excel(uploaded_file, skiprows=2)
                 
                 # Standardize Columns
@@ -208,20 +199,14 @@ def main():
                     'Description', 'Withdrawal', 'Deposit', 'Balance', 'Notes'
                 ]
                 
-                # Check if we have enough columns roughly
                 if len(df.columns) >= len(expected_columns):
-                    # Rename columns strictly to what we need
                     df.columns = expected_columns + list(df.columns[len(expected_columns):])
                 else:
                     st.error("ساختار فایل اکسل با الگوی استاندارد مطابقت ندارد.")
-                    st.write("ستون‌های پیدا شده:", list(df.columns))
                     return
-
             else:
-                # Placeholder for PDF
-                df = extract_data_from_pdf(uploaded_file)
-                if df.empty:
-                    return
+                st.error("لطفا فقط فایل اکسل بارگذاری کنید.")
+                return
 
             # Process Data
             with st.spinner('در حال پردازش اطلاعات...'):
@@ -230,12 +215,9 @@ def main():
             if not report_df.empty:
                 st.success("پردازش با موفقیت انجام شد!")
                 
-                # Tabs for better UI
                 tab1, tab2 = st.tabs(["📋 پیش‌نمایش جدول", "📥 دانلود گزارش"])
 
                 with tab1:
-                    # Streamlit creates a beautiful interactive table automatically
-                    # We configure columns to show commas for thousands separator
                     st.dataframe(
                         report_df,
                         use_container_width=True,
@@ -260,7 +242,7 @@ def main():
                         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     )
             else:
-                st.warning("داده‌ای برای نمایش یافت نشد. لطفاً فایل ورودی را بررسی کنید.")
+                st.warning("داده‌ای برای نمایش یافت نشد.")
 
         except Exception as e:
             st.error(f"خطایی رخ داد: {e}")
